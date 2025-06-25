@@ -17,7 +17,7 @@ Building creative digital solutions, web tools, automation, affiliate marketing 
 ## 🌐 Portfolio & Social Links
 
 - 🔗 **Portfolio Website:** https://github.com/rmvgroupsdigitaltools
-- ☕ **Buy Me a Coffee:** https://buymeacoffee.com/rmvgroups
+- ☕ **Buy Me a Coffee:** https://buymeacoffee.com/rmvgroups?new=1
 - 🛒 **Gumroad Store:** https://rmvassociates.gumroad.com/
 - 🏪 **DigiStore24:** https://www.digistore24.com/redir/19083/RMVAssociates/
 - 📚 **Amazon Affiliate:** https://www.amazon.in/affiliate/s?k=affiliate&linkCode=ll2&tag=rmvgroupsmarketplace-21
