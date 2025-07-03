@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate All-in-One QR Code Generator</title>
+    
+    <!-- Google Fonts for professional typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Free QR Code Styling Library from CDN -->
+    <script type="text/javascript" src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
+
+    <style>
+        :root {
+            --primary-color: #00bcd4; --secondary-color: #ff4081; --tertiary-color: #fdd835;
+            --background-color: #1a1a2e; --container-bg-color: #16213e; --text-color: #e0fbfc;
+            --input-bg-color: #0f3460; --border-radius: 12px; --shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Poppins', sans-serif; background: var(--background-color); color: var(--text-color);
+            display: flex; justify-content: center; align-items: flex-start;
+            min-height: 100vh; padding: 2rem; background-image: linear-gradient(315deg, #1a1a2e 0%, #16213e 74%);
+        }
+        .main-container {
+            width: 100%; max-width: 1450px; background: var(--container-bg-color); border-radius: var(--border-radius);
+            box-shadow: var(--shadow); padding: 2.5rem; border: 2px solid transparent;
+            border-image: linear-gradient(45deg, var(--primary-color), var(--secondary-color)) 1;
+            animation: pulse-border 6s infinite linear;
+        }
+        @keyframes pulse-border { 0% { border-image: linear-gradient(45deg, var(--primary-color), var(--secondary-color)) 1; } 50% { border-image: linear-gradient(45deg, var(--secondary-color), var(--primary-color)) 1; } 100% { border-image: linear-gradient(45deg, var(--primary-color), var(--secondary-color)) 1; } }
+        header { text-align: center; margin-bottom: 2.5rem; }
+        header h1 { font-size: 2.8rem; font-weight: 700; background: -webkit-linear-gradient(45deg, var(--primary-color), var(--secondary-color)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 1px; }
+        header p { font-size: 1.1rem; color: var(--text-color); opacity: 0.8; margin-top: 0.5rem; max-width: 800px; margin-left: auto; margin-right: auto;}
+        .tool-layout { display: grid; grid-template-columns: 1.6fr 1fr; gap: 2.5rem; }
+        .controls-container { display: flex; flex-direction: column; gap: 1.5rem; }
+        .control-group { background: var(--input-bg-color); padding: 1.5rem; border-radius: var(--border-radius); border-left: 4px solid var(--primary-color); }
+        .control-group label { display: block; margin-bottom: 0.75rem; font-weight: 600; font-size: 1.1rem; }
+        .input-wrapper { position: relative; }
+        textarea, input, select {
+            width: 100%; padding: 0.8rem 1rem; background: rgba(0,0,0,0.3);
+            border: 1px solid var(--primary-color); border-radius: 8px; color: var(--text-color);
+            font-family: 'Poppins', sans-serif; font-size: 1rem; transition: all 0.3s ease;
+        }
+        input::placeholder, textarea::placeholder { color: rgba(224, 251, 252, 0.5); }
+        textarea:focus, input:focus, select:focus { outline: none; border-color: var(--secondary-color); box-shadow: 0 0 15px rgba(255, 64, 129, 0.5); }
+        textarea { min-height: 100px; resize: vertical; }
+        #clear-btn {
+            position: absolute; top: 10px; right: 10px; width: 32px; height: 32px;
+            background: var(--secondary-color); border: none; color: var(--container-bg-color);
+            font-size: 1.6rem; font-weight: bold; cursor: pointer; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; z-index: 10;
+            opacity: 0.8; transition: all 0.3s ease; line-height: 1; padding-bottom: 3px;
+        }
+        #clear-btn:hover { opacity: 1; transform: rotate(90deg) scale(1.1); box-shadow: 0 0 10px var(--secondary-color); }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .form-grid-full { display: flex; flex-direction: column; gap: 1rem; }
+        .tabs-nav { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 1.5rem; }
+        .tab-btn {
+            padding: 8px 15px; font-weight: 500; font-size: 0.9rem; background: transparent;
+            color: var(--primary-color); border: 2px solid var(--primary-color); border-radius: 20px;
+            cursor: pointer; transition: all 0.3s ease;
+        }
+        .tab-btn.active { background: var(--primary-color); color: var(--container-bg-color); font-weight: 600; box-shadow: 0 0 10px var(--primary-color); }
+        .tab-content { display: none; } .tab-content.active { display: block; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .qr-code-container {
+            background: var(--input-bg-color); border-radius: var(--border-radius); padding: 2rem;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
+            position: sticky; top: 2rem;
+        }
+        #canvas { border: 1px solid var(--primary-color); border-radius: var(--border-radius); padding: 10px; background-color: #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.2); transition: all 0.3s ease; }
+        #canvas canvas, #canvas svg { display: block; }
+        #status-message { margin-top: 1.5rem; font-size: 1rem; opacity: 0.9; min-height: 40px; line-height: 1.5; }
+        #status-message a { color: var(--primary-color); font-weight: 600; text-decoration: none; cursor: pointer; transition: color 0.3s ease; border-bottom: 1px dashed var(--primary-color); }
+        #status-message a:hover { color: var(--secondary-color); border-bottom-color: var(--secondary-color); }
+        
+        /* Dropdown CTA Button */
+        .download-cta-container { position: relative; display: flex; margin-top: 1.5rem; }
+        .cta-btn {
+            padding: 0.8rem 1.5rem; border: none; font-size: 1rem; font-weight: 600; cursor: pointer;
+            transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .cta-btn.main-action {
+            background-image: linear-gradient(45deg, var(--primary-color) 0%, #00d4ff 100%); color: var(--background-color);
+            border-radius: 8px 0 0 8px; flex-grow: 1;
+        }
+        .cta-btn.dropdown-toggle {
+            background-image: linear-gradient(45deg, var(--secondary-color) 0%, #ff79b0 100%); color: var(--background-color);
+            border-radius: 0 8px 8px 0; border-left: 1px solid rgba(0,0,0,0.2); padding: 0.8rem 1rem;
+        }
+        .cta-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3); }
+        .dropdown-menu {
+            display: none; position: absolute; top: 100%; right: 0; background: var(--container-bg-color);
+            border: 1px solid var(--primary-color); border-radius: 8px; box-shadow: var(--shadow);
+            z-index: 100; list-style: none; margin-top: 5px; overflow: hidden;
+        }
+        .dropdown-menu.show { display: block; }
+        .dropdown-menu li a {
+            display: block; padding: 10px 20px; color: var(--text-color);
+            text-decoration: none; transition: background-color 0.2s;
+        }
+        .dropdown-menu li a:hover { background-color: var(--primary-color); color: var(--background-color); }
+
+        /* Affiliate Footer */
+        footer { text-align: center; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--input-bg-color); }
+        .affiliate-link a {
+            color: var(--tertiary-color); font-weight: 500; text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        .affiliate-link a:hover { color: #fff; text-decoration: underline; }
+
+        @media (max-width: 1200px) { .tool-layout { grid-template-columns: 1fr; } .qr-code-container { position: static; margin-top: 2rem; } }
+        @media (max-width: 768px) { body { padding: 1rem; } .main-container { padding: 1.5rem; } header h1 { font-size: 2.2rem; } .form-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <header>
+            <h1>Ultimate All-in-One QR Code Generator</h1>
+            <p>The definitive tool to create professional, styled QR codes for any purposeâ€”from links and Wi-Fi to a massive library of social media profiles, crypto payments, and calendar events.</p>
+        </header>
+
+        <div class="tool-layout">
+            <!-- Left Side: Controls -->
+            <div class="controls-container">
+                <div class="control-group">
+                    <div class="input-wrapper">
+                        <label>Select QR Code Type</label>
+                        <button id="clear-btn" title="Clear All Inputs in This Tab">Ã—</button>
+                    </div>
+                    <div class="tabs-nav">
+                        <button class="tab-btn active" data-tab="text">Text/URL</button>
+                        <button class="tab-btn" data-tab="links">Social & Links</button>
+                        <button class="tab-btn" data-tab="wifi">Wi-Fi</button>
+                        <button class="tab-btn" data-tab="vcard">vCard</button>
+                        <button class="tab-btn" data-tab="event">Event</button>
+                        <button class="tab-btn" data-tab="payment">Payment</button>
+                        <button class="tab-btn" data-tab="app">App Store</button>
+                        <button class="tab-btn" data-tab="email">Email</button>
+                        <button class="tab-btn" data-tab="phone">Phone</button>
+                        <button class="tab-btn" data-tab="sms">SMS</button>
+                        <button class="tab-btn" data-tab="geo">Geo</button>
+                    </div>
+
+                    <!-- Tab Content Panels -->
+                    <div id="tab-content-text" class="tab-content active"><textarea id="data-input" placeholder="e.g., https://example.com">https://onlinedigitaltoolsworld.blogspot.com/</textarea></div>
+                    <div id="tab-content-links" class="tab-content"><div class="form-grid-full"><select id="link-platform"></select><input type="text" id="link-user" placeholder="Enter Username, ID, or full URL..."></div></div>
+                    <div id="tab-content-wifi" class="tab-content"><div class="form-grid"><input type="text" id="wifi-ssid" placeholder="Network Name (SSID)"><input type="text" id="wifi-pass" placeholder="Password"></div><select id="wifi-encryption" style="margin-top:1rem;"><option value="WPA">WPA/WPA2</option><option value="WEP">WEP</option><option value="nopass">No Password</option></select></div>
+                    <div id="tab-content-vcard" class="tab-content"><div class="form-grid"><input type="text" id="vcard-name" placeholder="Full Name"><input type="tel" id="vcard-phone" placeholder="Phone"><input type="email" id="vcard-email" placeholder="Email"><input type="text" id="vcard-org" placeholder="Organization"></div></div>
+                    <div id="tab-content-email" class="tab-content"><div class="form-grid-full"><input type="email" id="email-to" placeholder="Recipient Email"><input type="text" id="email-subject" placeholder="Subject"><textarea id="email-body" placeholder="Email Body"></textarea></div></div>
+                    <div id="tab-content-phone" class="tab-content"><input type="tel" id="phone-number" placeholder="Enter phone number with country code"></div>
+                    <div id="tab-content-sms" class="tab-content"><div class="form-grid-full"><input type="tel" id="sms-number" placeholder="Recipient phone number"><textarea id="sms-message" placeholder="Your SMS message"></textarea></div></div>
+                    <div id="tab-content-geo" class="tab-content"><div class="form-grid"><input type="number" step="any" id="geo-lat" placeholder="Latitude"><input type="number" step="any" id="geo-lon" placeholder="Longitude"></div></div>
+                    <div id="tab-content-event" class="tab-content"><div class="form-grid-full"><input type="text" id="event-title" placeholder="Event Title"><div class="form-grid"><input type="datetime-local" id="event-start" title="Event Start Time"><input type="datetime-local" id="event-end" title="Event End Time"></div><input type="text" id="event-location" placeholder="Location"><textarea id="event-desc" placeholder="Event Description"></textarea></div></div>
+                    <div id="tab-content-app" class="tab-content"><div class="form-grid-full"><select id="app-store"><option value="google">Google Play Store</option><option value="apple">Apple App Store</option></select><input type="text" id="app-id" placeholder="App ID or package name"></div></div>
+                    <div id="tab-content-payment" class="tab-content"><div class="form-grid-full"><select id="payment-type"><option value="paypal">PayPal.me</option><option value="bitcoin">Bitcoin (BTC)</option><option value="ethereum">Ethereum (ETH)</option></select><div id="payment-fields"></div></div></div>
+                </div>
+
+                <div class="control-group">
+                    <label>Visual Style & Options</label>
+                    <div class="form-grid" style="align-items: center;"><div class="color-input-wrapper" style="display:flex;align-items:center;gap:10px;"><input type="checkbox" id="gradient-toggle" style="width:20px;height:20px;"><span style="font-size:0.9em;">Enable Gradient</span></div><div class="color-input-wrapper" style="display:flex;align-items:center;gap:10px;"><input type="color" id="dot-color-input" value="#ff4081"><span style="font-size:0.9em;">Dot Color</span></div></div>
+                    <div id="gradient-options" class="form-grid" style="display:none;margin-top:1rem;"><div class="color-input-wrapper" style="display:flex;align-items:center;gap:10px;"><input type="color" id="gradient-start" value="#00bcd4"><span>Start</span></div><div class="color-input-wrapper" style="display:flex;align-items:center;gap:10px;"><input type="color" id="gradient-end" value="#ff4081"><span>End</span></div></div>
+                    <div class="form-grid" style="margin-top:1.5rem;"><select id="dot-style-select"><option value="dots">Dots</option><option value="rounded" selected>Rounded</option><option value="classy">Classy</option><option value="classy-rounded">Classy Rounded</option><option value="square">Square</option><option value="extra-rounded">Extra Rounded</option></select><select id="corner-style-select"><option value="square">Square</option><option value="dot">Dot</option><option value="extra-rounded" selected>Extra Rounded</option></select></div>
+                    <div style="margin-top:1.5rem;"><div class="slider-wrapper" style="display:flex;align-items:center;gap:15px;margin-bottom:1rem;"><label for="size-slider" style="margin:0;">Size:</label><input type="range" id="size-slider" min="100" max="1000" value="300" step="10" style="flex-grow:1;"><span id="size-value" style="min-width:50px;text-align:right;">300px</span></div><div class="slider-wrapper" style="display:flex;align-items:center;gap:15px;"><label for="margin-slider" style="margin:0;">Margin:</label><input type="range" id="margin-slider" min="0" max="50" value="10" step="1" style="flex-grow:1;"><span id="margin-value" style="min-width:50px;text-align:right;">10px</span></div></div>
+                    <div class="form-grid" style="margin-top:1.5rem;align-items:end;"><div><label for="logo-input" style="font-size:0.9em;margin-bottom:5px;">Logo (optional)</label><input type="file" id="logo-input" accept="image/*" style="border:none;padding:0;"></div><div><label for="error-correction-select" style="font-size:0.9em;margin-bottom:5px;">Error Correction</label><select id="error-correction-select"><option value="L">Low</option><option value="M">Medium</option><option value="Q">Quartile</option><option value="H" selected>High (for logos)</option></select></div></div>
+                </div>
+            </div>
+
+            <!-- Right Side: QR Code Preview -->
+            <div class="qr-code-container">
+                <div id="canvas"></div>
+                <div id="status-message"></div>
+                <div class="download-cta-container">
+                    <button class="cta-btn main-action" id="download-png-btn">Download PNG</button>
+                    <button class="cta-btn dropdown-toggle" id="dropdown-toggle-btn">â–¾</button>
+                    <ul class="dropdown-menu" id="dropdown-menu">
+                        <li><a href="#" id="download-svg-link">Download SVG</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p class="affiliate-link">
+                <!-- Add your Affiliate Link here -->
+                <a href="https://onlinedigitaltoolsworld.blogspot.com/2025/05/advanced-QR-Code-Generator%20.html?m=1" target="_blank" rel="noopener noreferrer">Powered by Online Digital Tools World</a>
+            </p>
+        </footer>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Element Selection ---
+    const allInputs = document.querySelectorAll('input, textarea, select');
+    const canvasContainer = document.getElementById('canvas'), statusMessage = document.getElementById('status-message');
+    const downloadPngBtn = document.getElementById('download-png-btn'), dropdownToggleBtn = document.getElementById('dropdown-toggle-btn'), dropdownMenu = document.getElementById('dropdown-menu'), downloadSvgLink = document.getElementById('download-svg-link');
+    const clearBtn = document.getElementById('clear-btn');
+    const tabBtns = document.querySelectorAll('.tab-btn'), tabContents = document.querySelectorAll('.tab-content');
+    const dotColorInput = document.getElementById('dot-color-input'), gradientToggle = document.getElementById('gradient-toggle'), gradientOptions = document.getElementById('gradient-options'), gradientStart = document.getElementById('gradient-start'), gradientEnd = document.getElementById('gradient-end'), dotStyleSelect = document.getElementById('dot-style-select'), cornerStyleSelect = document.getElementById('corner-style-select'), errorCorrectionSelect = document.getElementById('error-correction-select'), logoInput = document.getElementById('logo-input'), sizeSlider = document.getElementById('size-slider'), sizeValue = document.getElementById('size-value'), marginSlider = document.getElementById('margin-slider'), marginValue = document.getElementById('margin-value');
+    
+    let activeTab = 'text';
+    let logoFile = null;
+
+    // --- Data Libraries ---
+    const linkPlatforms = {
+        'Custom URL': { prefix: '' }, 'Facebook': { prefix: 'https://facebook.com/' }, 'Twitter (X)': { prefix: 'https://x.com/' }, 'Instagram': { prefix: 'https://instagram.com/' }, 'LinkedIn': { prefix: 'https://linkedin.com/in/' }, 'TikTok': { prefix: 'https://tiktok.com/@' }, 'YouTube': { prefix: 'https://youtube.com/c/' }, 'Pinterest': { prefix: 'https://pinterest.com/' }, 'Snapchat': { prefix: 'https://snapchat.com/add/' }, 'Reddit': { prefix: 'https://reddit.com/user/' }, 'Telegram': { prefix: 'https://t.me/' }, 'WhatsApp': { prefix: 'https://wa.me/' }, 'GitHub': { prefix: 'https://github.com/' }, 'Behance': { prefix: 'https://behance.net/' }, 'Dribbble': { prefix: 'https://dribbble.com/' }, 'Spotify': { prefix: 'https://open.spotify.com/user/' }, 'SoundCloud': { prefix: 'https://soundcloud.com/' }, 'Twitch': { prefix: 'https://twitch.tv/' }, 'Vimeo': { prefix: 'https://vimeo.com/' }, 'Skype': { pre
